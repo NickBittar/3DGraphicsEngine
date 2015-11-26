@@ -6,7 +6,7 @@ import java.awt.event.*;
  * Created by Nick Bittar on 11/8/2015.
  * For CSC 443 - Computer Graphics
  */
-public class TransformationEngine3D extends JPanel implements ActionListener, MouseListener, MouseMotionListener
+public class GraphicsEngine3D extends JPanel implements ActionListener, MouseListener, MouseMotionListener
 {
     public static Model model;
 
@@ -38,7 +38,7 @@ public class TransformationEngine3D extends JPanel implements ActionListener, Mo
         container.setLayout(new GridLayout(2, 3, 2, 2));    // rows=2; cols=3 ; border width=2 ; border height=2
         container.setOpaque(true);
         container.setBackground(Color.BLACK);
-        JPanel panel = new TransformationEngine3D();                      // Create Panel with my engine one it
+        JPanel panel = new GraphicsEngine3D();                      // Create Panel with my engine one it
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setTitle("3-D Graphics Engine - Nick Bittar");
@@ -55,7 +55,7 @@ public class TransformationEngine3D extends JPanel implements ActionListener, Mo
         frame.pack();
         run();                                                          // Start
     }
-    public TransformationEngine3D()
+    public GraphicsEngine3D()
     {
         // Add Mouse Listeners
         addMouseListener(this);
