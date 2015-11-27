@@ -18,7 +18,7 @@ public class Axis extends Model
 
     public void setScale(int scale)
     {
-        resetVertices();
+        clearVertices();
         createAxis(scale);
     }
     public int getScale()

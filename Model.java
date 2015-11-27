@@ -12,7 +12,7 @@ public class Model
 
     public Model(String shape, int[] args)
     {
-        resetVertices();
+        clearVertices();
         
         int scale = 0;
         if(args != null)
@@ -22,19 +22,6 @@ public class Model
 
         if(shape.equalsIgnoreCase("cube"))
         {
-            /*
-            // 4x4x4 Cube
-            addPoint(scale, scale, -scale);
-            addPoint(-scale, scale, -scale);
-            addPoint(-scale, scale, scale);
-            addPoint(scale, scale, scale);
-
-            addPoint(-scale, -scale, -scale);
-            addPoint(scale, -scale, scale);
-            addPoint(-scale, -scale, scale);
-            addPoint(scale, -scale, -scale);
-            */
-
             // Top Face
             addPoint( scale,  scale,  scale);
             addPoint( scale,  scale, -scale);
@@ -85,7 +72,7 @@ public class Model
         }
         else if(shape.equalsIgnoreCase("axis"))
         {
-            scale *= 5;         // Make it 5 times bigger because it looks better
+            scale *= 2;         // Make it 5 times bigger because it looks better
             createAxis(scale);
         }
         else if(shape.equalsIgnoreCase("triangle"))
@@ -107,47 +94,71 @@ public class Model
             addPoint(2, 0, -1);
 
         }
-        else if(shape.equalsIgnoreCase("line"))
-        {
-            addPoint(0,0,0);
-            addPoint(1,0,0);
-            addPoint(2,0,0);
-            addPoint(3,0,0);
-            addPoint(4,0,0);
-            addPoint(5,0,0);
-        }
         else
         {
-            addPoint(1, 1, 1);
+            addPoint(0, 0, 0);
         }
-
-
-
     }
 
+    /**
+     * Gets the current amount of vertices in the model.
+     *
+     * @return The number of vertices in the model.
+     */
     public int ptCount()
     {
         return Xs.size();
     }
+
+    /**
+     * Provides the X-value of the vertex at the specified index.
+     *
+     * @param i The index of the point.
+     * @return The X value of the point.
+     */
     public double getX(int i)
     {
         return Double.parseDouble(Xs.get(i).toString());
     }
+    /**
+     * Provides the Y-value of the vertex at the specified index.
+     *
+     * @param i The index of the point.
+     * @return The Y value of the point.
+     */
     public double getY(int i)
     {
         return Double.parseDouble(Ys.get(i).toString());
     }
+    /**
+     * Provides the Z-value of the vertex at the specified index.
+     *
+     * @param i The index of the point.
+     * @return The Z value of the point.
+     */
     public double getZ(int i)
     {
         return Double.parseDouble(Zs.get(i).toString());
     }
-    public void resetVertices()
+
+    /**
+     * Provides a way of resetting the model's vertices
+     */
+    public void clearVertices()
     {
         // Reset points
         Xs = new ArrayList();
         Ys = new ArrayList();
         Zs = new ArrayList();
     }
+
+    /**
+     * Adds a vertex at the specified location.  This method should be used in groups of three's to specify triangles.
+     *
+     * @param x The X value of the point.
+     * @param y The Y Value of the point.
+     * @param z The Z Value of the point.
+     */
     public void addPoint(double x, double y, double z)
     {
         Xs.add(x);
@@ -157,6 +168,7 @@ public class Model
 
     /**
      * Provides the center point of the polygon based on the X and Y coordinates in Xs and Ys ArrayLists.
+     *
      * @return The Centroid of the polygon
      */
     public void createAxis(int scale)
@@ -167,9 +179,15 @@ public class Model
         addPoint(0,  scale, 0);
         addPoint(0, -scale, 0);
 
-        addPoint(0, 0,  scale);
+        addPoint(0, 0, scale);
         addPoint(0, 0, -scale);
     }
+
+    /**
+     * Provides the center of the model in XYZ space.
+     *
+     * @return An array containing the [0]X, [1]Y, [2]Z Values of the centroid of the model.
+     */
     public double[] getCentroid()
     {
         double xSum = 0;
@@ -186,22 +204,23 @@ public class Model
         // returns the average of the X points and the average of the Y points.
         return new double[] { xSum/pointCount, ySum/pointCount, zSum/pointCount };
     }
+
     /**
-     * Scales the polygon based on the provided scaling factors.
+     * Scales the model with the specified scaling factors.
+     *
+     * @param Sx The scaling factor in the X direction.
+     * @param Sy The scaling factor in the Y direction.
+     * @param Sz The scaling factor in the Z direction.
      */
-    /*
-    private static void scale(double[] arguments)
+    public void scale(double Sx, double Sy, double Sz)
     {
-        double Sx = arguments[0];
-        double Sy = arguments[1];
-        double Sz = arguments[2];
         double[] centroid = getCentroid();
         double Cx = centroid[0];
         double Cy = centroid[1];
         double Cz = centroid[2];
 
         // Translate so centroid is at the origin
-        translate(new double[] { -Cx, -Cy, -Cz });
+        translate(-Cx, -Cy, -Cz);
 
         // Scale all points
         for(int i = 0; i < Xs.size(); i++)
@@ -221,35 +240,44 @@ public class Model
         }
 
         // Inverse translation so centroid is in original position
-        translate(new double[] { Cx, Cy, Cz });
+        translate(Cx, Cy, Cz);
     }
-    /**
-     * Rotates the polygon around its centroid.
-     * @param arguments Contains the value of Theta, the angle the polygon will be rotated by.
-     */
 
+    /**
+     * Moves the vertices of the model to make the object rotate around its centroid.
+     *
+     * @param theta The angle of rotation, counter-clockwise, around the X-axis.
+     * @param phi   The angle of rotation, counter-clockwise, around the Y-axis.
+     * @param omega The angle of rotation, counter-clockwise, around the Z-axis.
+     */
     public void rotate(double theta, double phi, double omega)
+    {
+        double[] centroid = getCentroid();
+        double Cx = centroid[0];
+        double Cy = centroid[1];
+        double Cz = centroid[2];
+
+        rotateAroundPivotPoint(theta, phi, omega, Cx, Cy, Cz);
+    }
+
+    /**
+     * Rotates the model around a specified point in space.
+     *
+     * @param theta The angle of rotation, counter-clockwise, around the X-axis.
+     * @param phi   The angle of rotation, counter-clockwise, around the Y-axis.
+     * @param omega The angle of rotation, counter-clockwise, around the Z-axis.
+     * @param Px The pivot point's world-space X-coordinate.
+     * @param Py The pivot point's world-space Y-coordinate.
+     * @param Pz The pivot point's world-space Z-coordinate.
+     */
+    public void rotateAroundPivotPoint(double theta, double phi, double omega, double Px, double Py, double Pz)
     {
         theta = Math.toRadians(theta);
         phi = Math.toRadians(phi);
         omega = Math.toRadians(omega);
 
-        double[] centroid = getCentroid();
-        double Cx = centroid[0];
-        double Cy = centroid[1];
-        double Cz = centroid[2];
-        // Translate so centroid is at the origin
-        translate( -Cx, -Cy, -Cz);
-        /*
-        *   To rotate...
-        *       X = Cos(theta)*X - Sin(theta)*Y;
-        *       Y = Sin(theta)*X + Cos(theta)*Y;
-        *
-        *   rotate around Y axis
-        *       Z = Z*cos(theta) - X*sin(theta)
-        *       X = Z*sin(theta) + X*cos(theta)
-        *       Y = Y
-         */
+        // Translate so centroid is at pivot point
+        translate( -Px, -Py, -Pz);
 
         for(int i = 0; i < Xs.size(); i++)
         {
@@ -259,6 +287,7 @@ public class Model
             double newX = 0;
             double newY = 0;
             double newZ = 0;
+            boolean newPoints = false;
             if(theta != 0)
             {
                 newY = y*Math.cos(theta) - z*Math.sin(theta);
@@ -266,6 +295,7 @@ public class Model
                 newX = x;
                 y = newY;
                 z = newZ;
+                newPoints = true;
             }
             if(phi != 0)
             {
@@ -275,25 +305,34 @@ public class Model
                 newY = y;
                 z = newZ;
                 x = newX;
+                newPoints = true;
             }
             if(omega != 0)
             {
                 newX = x*Math.cos(omega) - y*Math.sin(omega);
                 newY = x*Math.sin(omega) + y*Math.cos(omega);
                 newZ = z;
-            }
+                newPoints = true;
 
-            Xs.set(i, newX);
-            Ys.set(i, newY);
-            Zs.set(i, newZ);
+            }
+            if(newPoints)
+            {
+                Xs.set(i, newX);
+                Ys.set(i, newY);
+                Zs.set(i, newZ);
+            }
         }
         // Inverse translation so centroid is in original position
-        translate( Cx, Cy, Cz );
+        translate( Px, Py, Pz );
     }
-    /**
-     * Moves the polygon a given distance horizontally and vertically.
-     */
 
+    /**
+     * Moves all the vertices uniformly a specified amount to move the model.
+     *
+     * @param Tx The distance to move all points on the X-axis.
+     * @param Ty The distance to move all points on the Y-axis.
+     * @param Tz The distance to move all points on the Z-axis.
+     */
     public void translate(double Tx, double Ty, double Tz)
     {
         for(int i = 0; i < Xs.size(); i++)
@@ -314,24 +353,32 @@ public class Model
     }
 
     /**
-     * Prints out the current X and Y values of the vertices of the polygon.
+     * Moves the model so its centroid is exactly at the origin in world-space.
+     *
+     * @return An array containing the X, Y, and Z values of the distance the model was moved. (to inverse translate)
      */
-    /*
-    private static void printPolygon()
+    public double[] translateToOrigin()
     {
-        System.out.print("(");
-        for(int i = 0; i < Xs.size(); i++)
-        {
-            // Times the value by 1000, and the divides by 1000, to get points to 3 decimal places.
-            System.out.print(Math.round(Double.parseDouble(Xs.get(i).toString()) * 1000.0) / 1000.0 + ", " +
-                             Math.round(Double.parseDouble(Ys.get(i).toString()) * 1000.0) / 1000.0 + ", " +
-                             Math.round(Double.parseDouble(Zs.get(i).toString()) * 1000.0) / 1000.0);
-            if(i != Xs.size()-1)
-            {
-                System.out.print(", ");
-            }
-        }
-        System.out.println(")");
+        double[] centroid = getCentroid();
+        double Cx = centroid[0];
+        double Cy = centroid[1];
+        double Cz = centroid[2];
+        // Translate so centroid is at the origin
+        translate( -Cx, -Cy, -Cz);
+
+        return new double[] {Cx, Cy, Cz};
     }
-    */
+
+    /**
+     * Moves all the vertices of the model so the model's centroid is exactly at the specified XYZ location.
+     * 
+     * @param x The X position of the centroid of the model.
+     * @param y The Y position of the centroid of the model.
+     * @param z The Z position of the centroid of the model.
+     */
+    public void translateToPosition(double x, double y, double z)
+    {
+        translateToOrigin();
+        translate(x, y, z);
+    }
 }

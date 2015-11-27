@@ -41,35 +41,29 @@ public class ThreeDimensionalView extends JPanel
         axis = new Model("axis", new int[]{5});
         w = 300;
         h = 300;
+
+        updateCamera();
+
     }
-
-    public void update()
+    public void updateCamera()
     {
-
-        homogenousVal = new double[vertexCount];
-        for(int i =0; i < vertexCount; i++)
-        {
-            homogenousVal[i] = 1;
-        }
-        AhomogenousVal = new double[AvertexCount];
-        for(int i = 0; i < AvertexCount; i++)
-        {
-            AhomogenousVal[i] = 1;
-        }
         eX = 0;
         eY = 0;
-        eZ = -20;
+        eZ = -10;
         fov = 60;
         aspectRatio = 1/1;
         up = new Vector(0, 1, 0);
-        l = new Vector(10, 10, 10);
+        l = new Vector(1, 1, 1);
 
-        n = 1;
-        f = 10;
+        n = 0.1;
+        f = 100;
 
         U = new Vector();
         V = new Vector();
         W = new Vector();
+
+        homogenousVal = new double[vertexCount];
+        AhomogenousVal = new double[AvertexCount];
 
         viewX = new double[vertexCount];
         viewY = new double[vertexCount];
@@ -86,7 +80,7 @@ public class ThreeDimensionalView extends JPanel
         screenX = new int[vertexCount];
         screenY = new int[vertexCount];
         screenZ = new int[vertexCount];
-        
+
         AviewX = new double[AvertexCount];
         AviewY = new double[AvertexCount];
         AviewZ = new double[AvertexCount];
@@ -109,6 +103,17 @@ public class ThreeDimensionalView extends JPanel
         U.setAsDivisionOf(up_X_W, up_X_W.getMagnitude());
 
         V.setAsCrossProductOf(W, U);
+    }
+    public void update()
+    {
+        for(int i =0; i < vertexCount; i++)
+        {
+            homogenousVal[i] = 1;
+        }
+        for(int i = 0; i < AvertexCount; i++)
+        {
+            AhomogenousVal[i] = 1;
+        }
 
         applyViewMatrixTransformation();
         applyPerspectiveMatrixTransformation();
@@ -212,14 +217,6 @@ public class ThreeDimensionalView extends JPanel
         color = Color.BLACK.getRGB();
         for(int i = 0; i < vertexCount; i+= 3)
         {
-            /*
-            g.fillOval(screenX[i]- 2, screenY[i] - 2, 4, 4);
-            g.fillOval(screenX[i+1]- 2, screenY[i+1] - 2, 4, 4);
-            g.fillOval(screenX[i+2]- 2, screenY[i+2] - 2, 4, 4);
-            g.drawLine(screenX[i], screenY[i], screenX[i+1], screenY[i+1]);
-            g.drawLine(screenX[i+1], screenY[i+1], screenX[i+2], screenY[i+2]);
-            g.drawLine(screenX[i+2], screenY[i+2], screenX[i], screenY[i]);
-            */
             drawLine(screenX[i], screenY[i], screenX[i+1], screenY[i+1], color);
             drawLine(screenX[i+1], screenY[i+1], screenX[i+2], screenY[i+2], color);
             drawLine(screenX[i+2], screenY[i+2], screenX[i], screenY[i], color);
