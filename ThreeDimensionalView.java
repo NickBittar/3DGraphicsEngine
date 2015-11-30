@@ -1,9 +1,11 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 public class ThreeDimensionalView extends JPanel
 {
+    ArrayList<Model> models;
     Model model;
     int vertexCount;
 
@@ -36,7 +38,9 @@ public class ThreeDimensionalView extends JPanel
 
     public ThreeDimensionalView(Model obj)
     {
+        models = new ArrayList<Model>();
         model = obj;
+        models.add(model);
         vertexCount = model.ptCount();
         axis = new Model("axis", new int[]{5});
         w = 300;
@@ -49,7 +53,7 @@ public class ThreeDimensionalView extends JPanel
     {
         eX = 0;
         eY = 0;
-        eZ = -10;
+        eZ = -20;
         fov = 60;
         aspectRatio = 1/1;
         up = new Vector(0, 1, 0);
@@ -269,6 +273,20 @@ public class ThreeDimensionalView extends JPanel
             {
                 img.setRGB(x, y, color);
             }
+        }
+    }
+
+    public void changeFOV(int fov)
+    {
+        this.fov += fov;
+        // Thanks BearishMushroom
+        if(this.fov > 120)
+        {
+            this.fov = 120;
+        }
+        else if(this.fov < 20)
+        {
+            this.fov = 20;
         }
     }
 }

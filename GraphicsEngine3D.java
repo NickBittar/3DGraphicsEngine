@@ -1,6 +1,9 @@
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 
 /**
  * Created by Nick Bittar on 11/8/2015.
@@ -9,6 +12,8 @@ import java.awt.event.*;
 public class GraphicsEngine3D extends JPanel implements ActionListener
 {
     public static Model model;
+
+    public static ArrayList<Model> models;
 
     static ThreeDimensionalView view3D;
 
@@ -19,6 +24,7 @@ public class GraphicsEngine3D extends JPanel implements ActionListener
     static int scale;
 
     static double theta = 0, phi = 0, omega = 0;
+    static int fov = 60;
 
     static JButton resetBtn;
     static JButton updateBtn;
@@ -34,9 +40,15 @@ public class GraphicsEngine3D extends JPanel implements ActionListener
     static JTextField CxTxt, CyTxt, CzTxt;
     static JTextField TxTxt, TyTxt, TzTxt;
 
+    static JButton FOVneg, FOVpos;
+
+
+
     public static void main(String[] args)
     {
+        models = new ArrayList<Model>();
         model = new Model("cube", new int[] {2});
+        models.add(model);
         view3D = new ThreeDimensionalView(model);
         scale = 5;
         topView = new Panel(new View(model, View.VIEW_TOP, scale));
@@ -61,6 +73,7 @@ public class GraphicsEngine3D extends JPanel implements ActionListener
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setTitle("3-D Graphics Engine - Nick Bittar");
+        frame.setSize(900+21, 600+42);
         frame.setVisible(true);
 
         container.add(controls);
@@ -71,7 +84,7 @@ public class GraphicsEngine3D extends JPanel implements ActionListener
         container.add(frontView);
 
         frame.add(container);                                           // Add drawing panel to frame
-        frame.pack();
+        //frame.pack();
     }
     public GraphicsEngine3D()
     {
@@ -84,6 +97,8 @@ public class GraphicsEngine3D extends JPanel implements ActionListener
         moveXNegBtn.addActionListener(this);
         moveYNegBtn.addActionListener(this);
         moveZNegBtn.addActionListener(this);
+        FOVneg.addActionListener(this);
+        FOVpos.addActionListener(this);
         // Set timer to redraw panel every 16ms for ~60 frames per second to be rendered
         Timer timer = new Timer(16, this);
         timer.start();
@@ -139,8 +154,13 @@ public class GraphicsEngine3D extends JPanel implements ActionListener
         TxTxt.setActionCommand("translate");
         TyTxt.setActionCommand("translate");
         TzTxt.setActionCommand("translate");
-        
-        
+
+        FOVneg = new JButton("-1 FOV");
+        FOVpos = new JButton("+1 FOV");
+        FOVneg.setActionCommand("fov -1");
+        FOVpos.setActionCommand("fov 1");
+
+
 
         modelCtrls.add(new JLabel("Spin"));
         modelCtrls.add(RxTxt);
@@ -171,8 +191,8 @@ public class GraphicsEngine3D extends JPanel implements ActionListener
         cameraCtrls.add(updateBtn);
         cameraCtrls.add(new JButton(""));
         cameraCtrls.add(new JButton(""));
-        cameraCtrls.add(new JButton(""));
-        cameraCtrls.add(new JButton(""));
+        cameraCtrls.add(FOVneg);
+        cameraCtrls.add(FOVpos);
 
 
 
@@ -257,6 +277,11 @@ public class GraphicsEngine3D extends JPanel implements ActionListener
             {
                 String[] cmd = ev.getActionCommand().split(" ");
                 model.translate(Integer.parseInt(cmd[1]), Integer.parseInt(cmd[2]), Integer.parseInt(cmd[3]));
+            }
+            else if(ev.getActionCommand().contains("fov"))
+            {
+                String[] cmd = ev.getActionCommand().split(" ");
+                view3D.changeFOV(Integer.parseInt(cmd[1]));
             }
         }
         model.rotate(theta, phi, omega);

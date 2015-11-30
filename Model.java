@@ -371,7 +371,7 @@ public class Model
 
     /**
      * Moves all the vertices of the model so the model's centroid is exactly at the specified XYZ location.
-     * 
+     *
      * @param x The X position of the centroid of the model.
      * @param y The Y position of the centroid of the model.
      * @param z The Z position of the centroid of the model.
