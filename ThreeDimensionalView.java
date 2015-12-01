@@ -1,12 +1,11 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 
 public class ThreeDimensionalView extends JPanel
 {
-    ArrayList<Model> models;
     Model model;
+    Model projection;   // The transformed model in 2d screen coordinates
     int vertexCount;
 
     int w, h;                               // Width and Height of screen/panel
@@ -38,9 +37,8 @@ public class ThreeDimensionalView extends JPanel
 
     public ThreeDimensionalView(Model obj)
     {
-        models = new ArrayList<Model>();
         model = obj;
-        models.add(model);
+        projection = model.copy();
         vertexCount = model.ptCount();
         axis = new Model("axis", new int[]{5});
         w = 300;
@@ -53,7 +51,7 @@ public class ThreeDimensionalView extends JPanel
     {
         eX = 0;
         eY = 0;
-        eZ = -20;
+        eZ = -10;
         fov = 60;
         aspectRatio = 1/1;
         up = new Vector(0, 1, 0);
@@ -110,6 +108,7 @@ public class ThreeDimensionalView extends JPanel
     }
     public void update()
     {
+        projection = model.copy();
         for(int i =0; i < vertexCount; i++)
         {
             homogenousVal[i] = 1;

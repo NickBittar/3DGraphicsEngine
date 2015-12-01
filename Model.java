@@ -10,11 +10,15 @@ public class Model
     public ArrayList Ys;  // Y points
     public ArrayList Zs;  // Z points
 
+    public Triangle[] triangles;
+
+    public int scale;
+
     public Model(String shape, int[] args)
     {
         clearVertices();
         
-        int scale = 0;
+        scale = 0;
         if(args != null)
         {
             scale = args[0];
@@ -22,6 +26,58 @@ public class Model
 
         if(shape.equalsIgnoreCase("cube"))
         {
+            triangles = new Triangle[12];   // A cube has 6 square faces, triangulated to 12 triangles total
+            int x = scale;
+            Point XYZ, XYz, XyZ, Xyz, xYZ, xYz, xyZ, xyz;
+            Point   a,   b,   c,   d,   e,   f,   g,   h;
+            Triangle dba, dcb, gae, gda, ebf, eab, hef, hge, cfb, chf, dhc, dgh;
+            
+            XYZ = new Point( x,  x,  x);
+            XYz = new Point( x,  x, -x);
+            XyZ = new Point( x, -x,  x);
+            Xyz = new Point( x, -x, -x);
+            xYZ = new Point(-x,  x,  x);
+            xYz = new Point(-x,  x, -x);
+            xyZ = new Point(-x, -x,  x);
+            xyz = new Point(-x, -x, -x);
+
+            a = XYZ;
+            b = XYz;
+            c = XyZ;
+            d = Xyz;
+            e = xYZ;
+            f = xYz;
+            g = xyZ;
+            h = xyz;
+
+            dba = new Triangle( d, b, a);
+            dcb = new Triangle( d, c, b);
+            gae = new Triangle( g, a, e);
+            gda = new Triangle( g, d, a);
+            ebf = new Triangle( e, b, f);
+            eab = new Triangle( e, a, b);
+            hef = new Triangle( h, e, f);
+            hge = new Triangle( h, g, e);
+            cfb = new Triangle( c, f, b);
+            chf = new Triangle( c, h, f);
+            dhc = new Triangle( d, h, c);
+            dgh = new Triangle( d, g, h);
+
+            triangles[0] = dba;
+            triangles[1] = dcb;
+            triangles[2] = gae;
+            triangles[3] = gda;
+            triangles[4] = ebf;
+            triangles[5] = eab;
+            triangles[6] = hef;
+            triangles[7] = hge;
+            triangles[8] = cfb;
+            triangles[9] = chf;
+            triangles[10] = dhc;
+            triangles[11] = dgh;
+
+            
+            /*
             // Top Face
             addPoint( scale,  scale,  scale);
             addPoint( scale,  scale, -scale);
@@ -69,6 +125,7 @@ public class Model
             addPoint(-scale, -scale, -scale);
             addPoint(-scale,  scale, -scale);
             addPoint(-scale,  scale,  scale);
+            */
         }
         else if(shape.equalsIgnoreCase("axis"))
         {
@@ -380,5 +437,10 @@ public class Model
     {
         translateToOrigin();
         translate(x, y, z);
+    }
+
+    public Model copy()
+    {
+        return new Model("cube", new int[]{scale});
     }
 }
