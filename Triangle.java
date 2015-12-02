@@ -22,4 +22,16 @@ public class Triangle
     {
         return points;
     }
+    public Point getA()
+    {
+        return points[0];
+    }
+    public Point getB()
+    {
+        return points[1];
+    }
+    public Point getC()
+    {
+        return points[2];
+    }
 }

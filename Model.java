@@ -11,6 +11,7 @@ public class Model
     public ArrayList Zs;  // Z points
 
     public Triangle[] triangles;
+    public Point[] vertices;
 
     public int scale;
 
@@ -27,10 +28,11 @@ public class Model
         if(shape.equalsIgnoreCase("cube"))
         {
             triangles = new Triangle[12];   // A cube has 6 square faces, triangulated to 12 triangles total
+            vertices = new Point[8];        // 8 vertices for a cube
             int x = scale;
             Point XYZ, XYz, XyZ, Xyz, xYZ, xYz, xyZ, xyz;
             Point   a,   b,   c,   d,   e,   f,   g,   h;
-            Triangle dba, dcb, gae, gda, ebf, eab, hef, hge, cfb, chf, dhc, dgh;
+            Triangle bac, bcd, aeg, agc, fea, fab, efh, ehg, fbd, fdh, gdc, ghd;
             
             XYZ = new Point( x,  x,  x);
             XYz = new Point( x,  x, -x);
@@ -50,31 +52,40 @@ public class Model
             g = xyZ;
             h = xyz;
 
-            dba = new Triangle( d, b, a);
-            dcb = new Triangle( d, c, b);
-            gae = new Triangle( g, a, e);
-            gda = new Triangle( g, d, a);
-            ebf = new Triangle( e, b, f);
-            eab = new Triangle( e, a, b);
-            hef = new Triangle( h, e, f);
-            hge = new Triangle( h, g, e);
-            cfb = new Triangle( c, f, b);
-            chf = new Triangle( c, h, f);
-            dhc = new Triangle( d, h, c);
-            dgh = new Triangle( d, g, h);
+            vertices[0] = a;
+            vertices[1] = b;
+            vertices[2] = c;
+            vertices[3] = d;
+            vertices[4] = e;
+            vertices[5] = f;
+            vertices[6] = g;
+            vertices[7] = h;
 
-            triangles[0] = dba;
-            triangles[1] = dcb;
-            triangles[2] = gae;
-            triangles[3] = gda;
-            triangles[4] = ebf;
-            triangles[5] = eab;
-            triangles[6] = hef;
-            triangles[7] = hge;
-            triangles[8] = cfb;
-            triangles[9] = chf;
-            triangles[10] = dhc;
-            triangles[11] = dgh;
+            bac = new Triangle(b, a, c);
+            bcd = new Triangle(b, c, d);
+            aeg = new Triangle( );
+            agc = new Triangle( );
+            fea = new Triangle( );
+            fab = new Triangle( );
+            efh = new Triangle( );
+            ehg = new Triangle( );
+            fbd = new Triangle( );
+            fdh = new Triangle( );
+            gdc = new Triangle( );
+            ghd = new Triangle( );
+
+            triangles[0] = bac;
+            triangles[1] = bcd;
+            triangles[2] = aeg;
+            triangles[3] = agc;
+            triangles[4] = fea;
+            triangles[5] = fab;
+            triangles[6] = efh;
+            triangles[7] = ehg;
+            triangles[8] = fbd;
+            triangles[9] = fdh;
+            triangles[10] = gdc;
+            triangles[11] = ghd;
 
             
             /*
@@ -207,8 +218,54 @@ public class Model
         Xs = new ArrayList();
         Ys = new ArrayList();
         Zs = new ArrayList();
-    }
 
+        triangles = new Triangle[0];
+    }
+    public void retriangulate()
+    {
+        Point a, b, c, d, e, f, g, h;
+        Triangle dba, dcb, gae, gda, ebf, eab, hef, hge, cfb, chf, cgh, chd;
+
+        a = vertices[0];
+        b = vertices[1];
+        c = vertices[2];
+        d = vertices[3];
+        e = vertices[4];
+        f = vertices[5];
+        g = vertices[6];
+        h = vertices[7];
+
+        dba = new Triangle( d, b, a);
+        dcb = new Triangle( d, c, b);
+        gae = new Triangle( g, a, e);
+        gda = new Triangle( g, d, a);
+        ebf = new Triangle( e, b, f);
+        eab = new Triangle( e, a, b);
+        hef = new Triangle( h, e, f);
+        hge = new Triangle( h, g, e);
+        cfb = new Triangle( c, f, b);
+        chf = new Triangle( c, h, f);
+        cgh = new Triangle( c, g, h);
+        chd = new Triangle( c, h, d);
+
+        triangles[0] = dba;
+        triangles[1] = dcb;
+        triangles[2] = gae;
+        triangles[3] = gda;
+        triangles[4] = ebf;
+        triangles[5] = eab;
+        triangles[6] = hef;
+        triangles[7] = hge;
+        triangles[8] = cfb;
+        triangles[9] = chf;
+        triangles[10] = dba;
+        triangles[11] = dba;
+
+    }
+    public void addTriangle(int i, Point a, Point b, Point c)
+    {
+        triangles[i] = new Triangle(a, b, c);
+    }
     /**
      * Adds a vertex at the specified location.  This method should be used in groups of three's to specify triangles.
      *
@@ -380,7 +437,7 @@ public class Model
             }
         }
         // Inverse translation so centroid is in original position
-        translate( Px, Py, Pz );
+        translate(Px, Py, Pz);
     }
 
     /**
@@ -439,6 +496,26 @@ public class Model
         translate(x, y, z);
     }
 
+    public int getTriangleCount()
+    {
+        return triangles.length;
+    }
+    public Triangle getTriangle(int i)
+    {
+        return triangles[i];
+    }
+    public int getVertexCount()
+    {
+        return vertices.length;
+    }
+    public Point getVertex(int i)
+    {
+        return vertices[i];
+    }
+    public void setVertex(int i, Point p)
+    {
+        vertices[i] = new Point(p.getX(), p.getY(), p.getZ());
+    }
     public Model copy()
     {
         return new Model("cube", new int[]{scale});
