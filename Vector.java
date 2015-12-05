@@ -4,9 +4,9 @@
 public class Vector
 {
     public double x;
-
     public double y;
     public double z;
+
     public Vector(double x, double y, double z)
     {
         this.x = x;
@@ -85,7 +85,7 @@ public class Vector
         this.y = y;
         this.z = z;
     }
-    public static Vector divideVectors(Vector v, double a)
+    public static Vector divideVector(Vector v, double a)
     {
         double x, y, z;
         x = v.x/a;
@@ -94,13 +94,25 @@ public class Vector
 
         return new Vector(x, y, z);
     }
-    public static Vector multiplyVectorBy(Vector v, double a)
+    public void divideBy(double a)
+    {
+        x /= a;
+        y /= a;
+        z /= a;
+    }
+    public static Vector multiplyVector(Vector v, double a)
     {
         double x, y, z;
         x = a*v.getX();
         y = a*v.getY();
         z = a*v.getZ();
         return new Vector(x, y, z);
+    }
+    public void multiplyBy(double a)
+    {
+        x *= a;
+        y *= a;
+        z *= a;
     }
     public static Vector add(Vector a, Vector b)
     {
@@ -117,5 +129,10 @@ public class Vector
     public Vector neg()
     {
         return new Vector(-x, -y, -z);
+    }
+    public void normalize()
+    {
+        double length = getMagnitude();
+        divideBy(length);
     }
 }

@@ -37,6 +37,8 @@ public class ThreeDimensionalView extends JPanel
     BufferedImage img;
     double[][] zBuffer;
 
+    Light light;
+
     public ThreeDimensionalView(Model obj)
     {
         model = obj;
@@ -45,6 +47,7 @@ public class ThreeDimensionalView extends JPanel
         triangleCount = model.getTriangleCount();
         vertexCount = model.getVertexCount();
         axis = new Model("axis", new int[]{5});
+        light = new Light(new Point(5, 5, 0));
         w = 300;
         h = 300;
 
@@ -242,6 +245,7 @@ public class ThreeDimensionalView extends JPanel
             drawLine(AscreenX[i], AscreenY[i], AscreenX[i + 1], AscreenY[i + 1], color);
         }
         Triangle T;
+        double[] lighting;
         for(int y = 0; y < img.getHeight(); y++)
         {
             for(int x = 0; x < img.getWidth(); x++)
@@ -251,15 +255,16 @@ public class ThreeDimensionalView extends JPanel
                     T = projection.getTriangle(i);
                     if(T.isFacingCamera() && T.containsPoint(new Point(x, y, 0)))
                     {
-                        img.setRGB(x, y, Color.MAGENTA.getRGB());
+                        lighting = light.calculateIntensity(model.getTriangle(i).getCentroid(), model.getTriangle(i).getNormal(), new Point(eX, eY, eZ));
+                        //img.setRGB(x, y, new Color(150, 30, 30).getRGB());
+                        img.setRGB(x, y, new Color((int)(lighting[0]*255), (int) (lighting[1]*255), (int) (lighting[2]*255)).getRGB());
                         break;
-
                     }
                 }
             }
         }
         color = Color.BLACK.getRGB();
-
+        /*
         for(int i = 0; i < triangleCount; i++)
         {
             T = projection.getTriangle(i);
@@ -273,7 +278,7 @@ public class ThreeDimensionalView extends JPanel
                 drawLine((int) C.getX(), (int) C.getY(), (int) A.getX(), (int) A.getY(), color);
             }
         }
-
+        */
         g.drawImage(img, 0, 0, null);
         g.setColor(Color.BLACK);
         g.drawString("3D", 4, 16);

@@ -3,7 +3,8 @@
  */
 public class Light
 {
-    double x, y, z;         // Position in world space
+
+    Point position;  // Position in world space
     Vector l, v, r, n;      // Light, View, Reflection, Normal Vectors respectively
 
     double[] I;
@@ -26,9 +27,7 @@ public class Light
 
     public Light(Point p)
     {
-        x = p.getX();
-        y = p.getY();
-        z = p.getZ();
+        position = p;
 
         I = new double[3];
 
@@ -53,9 +52,13 @@ public class Light
 
         alpha = 10;
     }
-    public double[] calculateIntensity(Point p, Point e)
+    public double[] calculateIntensity(Point p, Vector normal, Point e)
     {
+        l = new Vector(position, p);
+        n = normal;
+        v = new Vector(e, p);
         calculateReflectionVector();
+        normalizeVectors();
         double attenuation;
         attenuation = 1/(a + b*d + c*d*d);
         for(int color = 0; color < 3; color++)
@@ -64,9 +67,16 @@ public class Light
         }
         return I;
     }
-    public void calculateReflectionVector()
+    private void calculateReflectionVector()
     {
-        r = Vector.add(l, Vector.multiplyVectorBy(n, (2*Vector.dotProduct(l, n)/(Math.pow(n.getMagnitude(), 2)))).neg());
+        r = Vector.add(l, Vector.multiplyVector(n, (2 * Vector.dotProduct(l, n) / (Math.pow(n.getMagnitude(), 2)))).neg());
+    }
+    private void normalizeVectors()
+    {
+        l.normalize();
+        v.normalize();
+        r.normalize();
+        n.normalize();
     }
 
 }

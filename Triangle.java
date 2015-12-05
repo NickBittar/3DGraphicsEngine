@@ -39,6 +39,21 @@ public class Triangle
         return points[2];
     }
 
+    public Point getCentroid()
+    {
+        double x=0, y=0, z=0;
+        for(int i = 0; i < points.length; i++)
+        {
+            x += points[i].getX();
+            y += points[i].getY();
+            z += points[i].getZ();
+        }
+        x /= 3;
+        y /= 3;
+        z /= 3;
+        return new Point(x, y, z);
+    }
+
     /**
      * Help with this function from http://www.blackpawn.com/texts/pointinpoly/
      * @param p Point to check if it is within this triangle
