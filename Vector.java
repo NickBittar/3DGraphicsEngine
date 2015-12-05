@@ -4,6 +4,7 @@
 public class Vector
 {
     public double x;
+
     public double y;
     public double z;
     public Vector(double x, double y, double z)
@@ -28,6 +29,20 @@ public class Vector
     public Vector()
     {
 
+    }
+    public double getX()
+    {
+        return x;
+    }
+
+    public double getY()
+    {
+        return y;
+    }
+
+    public double getZ()
+    {
+        return z;
     }
     public double getMagnitude()
     {
@@ -54,6 +69,10 @@ public class Vector
         z = b.y*a.x - a.y*b.x;
 
         return new Vector(x, y, z);
+    }
+    public static double dotProduct(Vector a, Vector b)
+    {
+        return a.getX()*b.getX() + a.getY()*b.getY() + a.getZ()*b.getZ();
     }
     public void setAsDivisionOf(Vector a, double b)
     {

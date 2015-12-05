@@ -65,4 +65,21 @@ public class Point
         this.y += Ty;
         this.z += Tz;
     }
+    public static double distanceBetween(Point a, Point b)
+    {
+        double x1, y1, x2, y2;
+        double x, y, d;
+
+        x1 = a.getX();
+        y1 = a.getY();
+        x2 = b.getX();
+        y2 = b.getY();
+
+        x = x2-x1;
+        y = y2-y1;
+
+        d = Math.sqrt(x*x + y*y);
+
+        return d;
+    }
 }
