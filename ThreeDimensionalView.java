@@ -218,7 +218,7 @@ public class ThreeDimensionalView extends JPanel
         w = getWidth();
         h = getHeight();
         img = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
-        zBuffer = new double[w][h];
+        //zBuffer = new double[w][h];
         int color;
         update();
 
@@ -239,10 +239,9 @@ public class ThreeDimensionalView extends JPanel
             {
                 color = Color.BLUE.getRGB();
             }
-            drawLine(AscreenX[i], AscreenY[i], AndcZ[i], AscreenX[i + 1], AscreenY[i + 1], AndcZ[i+1], color);
+            drawLine(AscreenX[i], AscreenY[i], AscreenX[i + 1], AscreenY[i + 1], color);
         }
         Triangle T;
-        double z;
         for(int y = 0; y < img.getHeight(); y++)
         {
             for(int x = 0; x < img.getWidth(); x++)
@@ -252,13 +251,9 @@ public class ThreeDimensionalView extends JPanel
                     T = projection.getTriangle(i);
                     if(T.isFacingCamera() && T.containsPoint(new Point(x, y, 0)))
                     {
-                        z = T.getDepthAt(x, y);
-                        if(z > zBuffer[x][y])
-                        {
-                            img.setRGB(x, y, Color.MAGENTA.getRGB());
-                            zBuffer[x][y] = z;
-                            break;
-                        }
+                        img.setRGB(x, y, Color.MAGENTA.getRGB());
+                        break;
+
                     }
                 }
             }
@@ -273,9 +268,9 @@ public class ThreeDimensionalView extends JPanel
                 Point A = T.getA();
                 Point B = T.getB();
                 Point C = T.getC();
-                drawLine((int) A.getX(), (int) A.getY(), A.getZ(), (int) B.getX(), (int) B.getY(), B.getZ(), color);
-                drawLine((int) B.getX(), (int) B.getY(), B.getZ(), (int) C.getX(), (int) C.getY(), C.getZ(), color);
-                drawLine((int) C.getX(), (int) C.getY(), C.getZ(), (int) A.getX(), (int) A.getY(), A.getZ(), color);
+                drawLine((int) A.getX(), (int) A.getY(), (int) B.getX(), (int) B.getY(), color);
+                drawLine((int) B.getX(), (int) B.getY(), (int) C.getX(), (int) C.getY(), color);
+                drawLine((int) C.getX(), (int) C.getY(), (int) A.getX(), (int) A.getY(), color);
             }
         }
 
@@ -283,12 +278,10 @@ public class ThreeDimensionalView extends JPanel
         g.setColor(Color.BLACK);
         g.drawString("3D", 4, 16);
     }
-    private void drawLine(int xi, int yi, double zi, int xf, int yf, double zf, int color)
+    private void drawLine(int xi, int yi,int xf, int yf, int color)
     {
-        double z;
         int x = xi;
         int y = yi;
-        double length = Point.distanceBetween(new Point(xi, yi), new Point(xf, yf));
         int dx = Math.abs(xf - x);
         int dy = Math.abs(yf - y);
 
@@ -298,20 +291,11 @@ public class ThreeDimensionalView extends JPanel
         int err = dx-dy;
         int e2;
 
-        double lengthI, lengthF;
-
         while (true)
         {
             if(x >= 0 && x < w && y >= 0 && y < h)
             {
-                lengthI = Point.distanceBetween(new Point(xi, yi), new Point(x, y));
-                lengthF = Point.distanceBetween(new Point(x, y), new Point(xf, yf));
-                z = zi*lengthI/length + zf*lengthF/length;
-                if(z > zBuffer[x][y])
-                {
-                    img.setRGB(x, y, color);
-                    zBuffer[x][y] = z;
-                }
+                img.setRGB(x, y, color);
             }
             if (x == xf && y == yf)
                 break;
@@ -338,7 +322,6 @@ public class ThreeDimensionalView extends JPanel
             for (int x = 0; x < w; x++)
             {
                 img.setRGB(x, y, color);
-                zBuffer[x][y] = Double.NEGATIVE_INFINITY;
             }
         }
     }

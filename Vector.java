@@ -85,14 +85,34 @@ public class Vector
         this.y = y;
         this.z = z;
     }
-    public static Vector divideVectors(Vector a, double b)
+    public static Vector divideVectors(Vector v, double a)
     {
         double x, y, z;
-        x = a.x/b;
-        y = a.y/b;
-        z = a.z/b;
+        x = v.x/a;
+        y = v.y/a;
+        z = v.z/a;
 
         return new Vector(x, y, z);
+    }
+    public static Vector multiplyVectorBy(Vector v, double a)
+    {
+        double x, y, z;
+        x = a*v.getX();
+        y = a*v.getY();
+        z = a*v.getZ();
+        return new Vector(x, y, z);
+    }
+    public static Vector add(Vector a, Vector b)
+    {
+        double x, y, z;
+        x = a.getX() + b.getX();
+        y = a.getY() + b.getY();
+        z = a.getZ() + b.getZ();
+        return new Vector(x, y, z);
+    }
+    public static Vector neg(Vector v)
+    {
+        return new Vector(-v.getX(), -v.getY(), -v.getZ());
     }
     public Vector neg()
     {
