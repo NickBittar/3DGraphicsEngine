@@ -13,7 +13,9 @@ public class View
     private int view;
 
     private Model model;
+    private Model projection;
     private int vertexCount;
+    private int triangleCount;
 
     private Axis axis;
     private int axisCount = 3;
@@ -31,7 +33,10 @@ public class View
     public View(Model obj, int view, int scale)        // View: 0 = top; 1 = side; 2 = front
     {
         model = obj;
-        vertexCount = obj.ptCount();
+        vertexCount = obj.getVertexCount();
+        triangleCount = obj.getTriangleCount();
+        projection = obj.copy();
+
         worldX = new double[vertexCount];
         worldY = new double[vertexCount];
         worldZ = new double[vertexCount];
@@ -118,11 +123,13 @@ public class View
      */
     private void loadVertices()
     {
+        Point p;
         for (int i = 0; i < vertexCount; i++)
         {
-            worldX[i] = model.getX(i);
-            worldY[i] = model.getY(i);
-            worldZ[i] = model.getZ(i);
+            p = model.getVertex(i);
+            worldX[i] = p.getX();
+            worldY[i] = p.getY();
+            worldZ[i] = p.getZ();
         }
     }
 
@@ -135,30 +142,38 @@ public class View
      */
     private void worldToScreen()
     {
+        Point p;
         if (view == VIEW_TOP)            // X -> x; Y -> z; Z -> -y
         {
             for (int i = 0; i < vertexCount; i++)
             {
-                screenX[i] = (int) (Math.round(w / (2*scale) * model.getX(i))) + w / 2;
-                screenY[i] = (int) (Math.round(h / (2*scale) * model.getZ(i))) + h / 2;
+                p = model.getVertex(i);
+                screenX[i] = (int) (Math.round(w / (2*scale) * p.getX())) + w / 2;
+                screenY[i] = (int) (Math.round(h / (2*scale) * p.getZ())) + h / 2;
+                projection.setVertex(i, new Point(screenX[i], screenY[i], worldZ[i]));
             }
         }
         else if (view == VIEW_SIDE)      // X -> z; Y -> y; Z -> -x
         {
             for (int i = 0; i < vertexCount; i++)
             {
-                screenX[i] = (int) (Math.round(w / (2*scale) * -model.getZ(i))) + w / 2;
-                screenY[i] = (int) (Math.round(h / (2*scale) * -model.getY(i))) + h / 2;
+                p = model.getVertex(i);
+                screenX[i] = (int) (Math.round(w / (2*scale) * -p.getZ())) + w / 2;
+                screenY[i] = (int) (Math.round(h / (2*scale) * -p.getY())) + h / 2;
+                projection.setVertex(i, new Point(screenX[i], screenY[i], worldZ[i]));
             }
         }
         else if (view == VIEW_FRONT)     // X -> x; Y -> y; Z ->  z
         {
             for (int i = 0; i < vertexCount; i++)
             {
-                screenX[i] = (int) (Math.round(w / (2*scale) * model.getX(i))) + w / 2;
-                screenY[i] = (int) (Math.round(h / (2*scale) * -model.getY(i))) + h / 2;
+                p = model.getVertex(i);
+                screenX[i] = (int) (Math.round(w / (2*scale) * p.getX())) + w / 2;
+                screenY[i] = (int) (Math.round(h / (2*scale) * -p.getY())) + h / 2;
+                projection.setVertex(i, new Point(screenX[i], screenY[i], worldZ[i]));
             }
         }
+        projection.retriangulate();
     }
 
     public void draw()
@@ -176,13 +191,18 @@ public class View
 
         // Draw Projection
         int color = Color.BLACK.getRGB();
-        for(int i = 0; i < vertexCount; i+= 3)
+        Triangle T;
+        Point A, B, C;
+        for(int i = 0; i < triangleCount; i++)
         {
-            drawLine(screenX[i], screenY[i], screenX[i + 1], screenY[i + 1], color);
-            drawLine(screenX[i + 1], screenY[i + 1], screenX[i + 2], screenY[i + 2], color);
-            drawLine(screenX[i + 2], screenY[i + 2], screenX[i], screenY[i], color);
+            T = projection.getTriangle(i);
+            A = T.getA();
+            B = T.getB();
+            C = T.getC();
+            drawLine((int) A.getX(), (int) A.getY(), (int) B.getX(), (int) B.getY(), color);
+            drawLine((int) B.getX(), (int) B.getY(), (int) C.getX(), (int) C.getY(), color);
+            drawLine((int) C.getX(), (int) C.getY(), (int) A.getX(), (int) A.getY(), color);
         }
-
         // Fill in surfaces of model
 
         // Apply Lighting effects

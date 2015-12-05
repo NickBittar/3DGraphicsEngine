@@ -15,8 +15,11 @@ public class Model
 
     public int scale;
 
+    public String shape;
+
     public Model(String shape, int[] args)
     {
+        this.shape = shape;
         clearVertices();
         
         scale = 0;
@@ -32,7 +35,6 @@ public class Model
             int x = scale;
             Point XYZ, XYz, XyZ, Xyz, xYZ, xYz, xyZ, xyz;
             Point   a,   b,   c,   d,   e,   f,   g,   h;
-            Triangle bac, bcd, aeg, agc, fea, fab, efh, ehg, fbd, fdh, gdc, ghd;
             
             XYZ = new Point( x,  x,  x);
             XYz = new Point( x,  x, -x);
@@ -61,96 +63,26 @@ public class Model
             vertices[6] = g;
             vertices[7] = h;
 
-            bac = new Triangle(b, a, c);
-            bcd = new Triangle(b, c, d);
-            aeg = new Triangle( );
-            agc = new Triangle( );
-            fea = new Triangle( );
-            fab = new Triangle( );
-            efh = new Triangle( );
-            ehg = new Triangle( );
-            fbd = new Triangle( );
-            fdh = new Triangle( );
-            gdc = new Triangle( );
-            ghd = new Triangle( );
-
-            triangles[0] = bac;
-            triangles[1] = bcd;
-            triangles[2] = aeg;
-            triangles[3] = agc;
-            triangles[4] = fea;
-            triangles[5] = fab;
-            triangles[6] = efh;
-            triangles[7] = ehg;
-            triangles[8] = fbd;
-            triangles[9] = fdh;
-            triangles[10] = gdc;
-            triangles[11] = ghd;
-
-            
-            /*
-            // Top Face
-            addPoint( scale,  scale,  scale);
-            addPoint( scale,  scale, -scale);
-            addPoint(-scale,  scale, -scale);
-            addPoint( scale,  scale,  scale);
-            addPoint(-scale,  scale, -scale);
-            addPoint(-scale,  scale,  scale);
-
-            // Front Face
-            addPoint(-scale, -scale,  scale);
-            addPoint( scale, -scale,  scale);
-            addPoint(-scale,  scale,  scale);
-            addPoint( scale, -scale,  scale);
-            addPoint( scale,  scale,  scale);
-            addPoint(-scale,  scale,  scale);
-
-            // Side Face
-            addPoint( scale, -scale,  scale);
-            addPoint( scale, -scale, -scale);
-            addPoint( scale,  scale,  scale);
-            addPoint( scale, -scale, -scale);
-            addPoint( scale,  scale, -scale);
-            addPoint( scale,  scale,  scale);
-
-            // Neg Top Face
-            addPoint( scale, -scale,  scale);
-            addPoint( scale, -scale, -scale);
-            addPoint(-scale, -scale, -scale);
-            addPoint( scale, -scale,  scale);
-            addPoint(-scale, -scale, -scale);
-            addPoint(-scale, -scale,  scale);
-
-            // Neg Front Face
-            addPoint(-scale, -scale, -scale);
-            addPoint( scale, -scale, -scale);
-            addPoint(-scale,  scale, -scale);
-            addPoint( scale, -scale, -scale);
-            addPoint( scale,  scale, -scale);
-            addPoint(-scale,  scale, -scale);
-
-            // Neg Side Face
-            addPoint(-scale, -scale,  scale);
-            addPoint(-scale, -scale, -scale);
-            addPoint(-scale,  scale,  scale);
-            addPoint(-scale, -scale, -scale);
-            addPoint(-scale,  scale, -scale);
-            addPoint(-scale,  scale,  scale);
-            */
+            retriangulate();
         }
         else if(shape.equalsIgnoreCase("axis"))
         {
             scale *= 2;         // Make it 5 times bigger because it looks better
             createAxis(scale);
         }
-        else if(shape.equalsIgnoreCase("triangle"))
+        else if(shape.equalsIgnoreCase("pyramid"))
         {
-            addPoint(0, 0, scale);
-            addPoint(0, scale, 0);
-            addPoint(0, 0, 0);
-            addPoint(scale+2, 0, 0);
-            addPoint(0, scale, 0);
-            addPoint(0, 0, 0);
+            vertices = new Point[5];
+            triangles = new Triangle[6];
+            int x = scale;
+
+            vertices[0] = new Point(-x, 0,  x);
+            vertices[1] = new Point(-x, 0, -x);
+            vertices[2] = new Point(x, 0,  x);
+            vertices[3] = new Point(x, 0,  -x);
+            vertices[4] = new Point(0, 2*x, 0);
+
+            retriangulate();
         }
         else if(shape.equalsIgnoreCase("arrow"))
         {
@@ -223,44 +155,71 @@ public class Model
     }
     public void retriangulate()
     {
-        Point a, b, c, d, e, f, g, h;
-        Triangle dba, dcb, gae, gda, ebf, eab, hef, hge, cfb, chf, cgh, chd;
+        if(shape.equals("cube"))
+        {
+            Point a, b, c, d, e, f, g, h;
+            Triangle bac, bcd, aeg, agc, fea, fab, efh, ehg, fbd, fdh, gdc, ghd;
 
-        a = vertices[0];
-        b = vertices[1];
-        c = vertices[2];
-        d = vertices[3];
-        e = vertices[4];
-        f = vertices[5];
-        g = vertices[6];
-        h = vertices[7];
+            a = vertices[0];
+            b = vertices[1];
+            c = vertices[2];
+            d = vertices[3];
+            e = vertices[4];
+            f = vertices[5];
+            g = vertices[6];
+            h = vertices[7];
 
-        dba = new Triangle( d, b, a);
-        dcb = new Triangle( d, c, b);
-        gae = new Triangle( g, a, e);
-        gda = new Triangle( g, d, a);
-        ebf = new Triangle( e, b, f);
-        eab = new Triangle( e, a, b);
-        hef = new Triangle( h, e, f);
-        hge = new Triangle( h, g, e);
-        cfb = new Triangle( c, f, b);
-        chf = new Triangle( c, h, f);
-        cgh = new Triangle( c, g, h);
-        chd = new Triangle( c, h, d);
+            bac = new Triangle(b, a, c);
+            bcd = new Triangle(b, c, d);
+            aeg = new Triangle(a, e, g);
+            agc = new Triangle(a, g, c);
+            fea = new Triangle(f, e, a);
+            fab = new Triangle(f, a, b);
+            efh = new Triangle(e, f, h);
+            ehg = new Triangle(e, h, g);
+            fbd = new Triangle(f, b, d);
+            fdh = new Triangle(f, d, h);
+            gdc = new Triangle(g, d, c);
+            ghd = new Triangle(g, h, d);
 
-        triangles[0] = dba;
-        triangles[1] = dcb;
-        triangles[2] = gae;
-        triangles[3] = gda;
-        triangles[4] = ebf;
-        triangles[5] = eab;
-        triangles[6] = hef;
-        triangles[7] = hge;
-        triangles[8] = cfb;
-        triangles[9] = chf;
-        triangles[10] = dba;
-        triangles[11] = dba;
+            triangles[0] = bac;
+            triangles[1] = bcd;
+            triangles[2] = aeg;
+            triangles[3] = agc;
+            triangles[4] = fea;
+            triangles[5] = fab;
+            triangles[6] = efh;
+            triangles[7] = ehg;
+            triangles[8] = fbd;
+            triangles[9] = fdh;
+            triangles[10] = gdc;
+            triangles[11] = ghd;
+        }
+        else if(shape.equals("pyramid"))
+        {
+            Point a, b, c, d, e;
+            Triangle bca, bdc, ecd, eac, eba, edb;
 
+            a = vertices[0];
+            b = vertices[1];
+            c = vertices[2];
+            d = vertices[3];
+            e = vertices[4];
+
+            bca = new Triangle(b, c, a);
+            bdc = new Triangle(b, d, c);
+            ecd = new Triangle(e, c, d);
+            eac = new Triangle(e, a, c);
+            eba = new Triangle(e, b, a);
+            edb = new Triangle(e, d, b);
+
+            triangles[0] = bca;
+            triangles[1] = bdc;
+            triangles[2] = ecd;
+            triangles[3] = eac;
+            triangles[4] = eba;
+            triangles[5] = edb;
+        }
     }
     public void addTriangle(int i, Point a, Point b, Point c)
     {
@@ -307,13 +266,15 @@ public class Model
         double xSum = 0;
         double ySum = 0;
         double zSum = 0;
-        int pointCount = Xs.size();
+        int pointCount = getVertexCount();
         // Sums all the X points, and sums all the Y points
+        Point p;
         for(int i = 0; i < pointCount; i++)
         {
-            xSum += Double.parseDouble(Xs.get(i).toString());
-            ySum += Double.parseDouble(Ys.get(i).toString());
-            zSum += Double.parseDouble(Zs.get(i).toString());
+            p = vertices[i];
+            xSum += p.getX();
+            ySum += p.getY();
+            zSum += p.getZ();
         }
         // returns the average of the X points and the average of the Y points.
         return new double[] { xSum/pointCount, ySum/pointCount, zSum/pointCount };
@@ -393,11 +354,13 @@ public class Model
         // Translate so centroid is at pivot point
         translate( -Px, -Py, -Pz);
 
-        for(int i = 0; i < Xs.size(); i++)
+        Point p;
+        for(int i = 0; i < getVertexCount(); i++)
         {
-            double x = getX(i);
-            double y = getY(i);
-            double z = getZ(i);
+            p = vertices[i];
+            double x = p.getX();
+            double y = p.getY();
+            double z = p.getZ();
             double newX = 0;
             double newY = 0;
             double newZ = 0;
@@ -431,9 +394,7 @@ public class Model
             }
             if(newPoints)
             {
-                Xs.set(i, newX);
-                Ys.set(i, newY);
-                Zs.set(i, newZ);
+                p.change(newX, newY, newZ);
             }
         }
         // Inverse translation so centroid is in original position
@@ -449,20 +410,20 @@ public class Model
      */
     public void translate(double Tx, double Ty, double Tz)
     {
-        for(int i = 0; i < Xs.size(); i++)
+        Point p;
+        for(int i = 0; i < getVertexCount(); i++)
         {
-            double x = getX(i);
-            double y = getY(i);
-            double z = getZ(i);
+            p = vertices[i];
+            double x = p.getX();
+            double y = p.getY();
+            double z = p.getZ();
 
             // Translate Transformation
             x += Tx;
             y += Ty;
             z += Tz;
 
-            Xs.set(i, x);
-            Ys.set(i, y);
-            Zs.set(i, z);
+            p.change(x, y, z);
         }
     }
 
@@ -518,6 +479,6 @@ public class Model
     }
     public Model copy()
     {
-        return new Model("cube", new int[]{scale});
+        return new Model(shape, new int[]{scale});
     }
 }
