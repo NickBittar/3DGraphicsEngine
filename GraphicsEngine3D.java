@@ -1,6 +1,4 @@
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
@@ -42,6 +40,10 @@ public class GraphicsEngine3D extends JPanel implements ActionListener
 
     static JButton FOVneg, FOVpos;
 
+    static JButton wireBtn, lightBtn, colorBtn;
+
+    static JButton zoomInBtn, zoomOutBtn;
+    static JButton rollLeftBtn, rollRightBtn;
 
 
     public static void main(String[] args)
@@ -49,8 +51,8 @@ public class GraphicsEngine3D extends JPanel implements ActionListener
         models = new ArrayList<Model>();
         model = new Model("cube", new int[] {2});
         models.add(model);
-        view3D = new ThreeDimensionalView(model);
         scale = 5;
+        view3D = new ThreeDimensionalView(model, scale);
         topView = new Panel(new View(model, View.VIEW_TOP, scale));
         sideView = new Panel(new View(model, View.VIEW_SIDE, scale));
         frontView = new Panel(new View(model, View.VIEW_FRONT, scale));
@@ -65,6 +67,8 @@ public class GraphicsEngine3D extends JPanel implements ActionListener
 
         JPanel controls = new JPanel();
         loadControls(controls);
+        JPanel controls2 = new JPanel();
+        loadControls2(controls2);
 
         container.setLayout(new GridLayout(2, 3, 2, 2));    // rows=2; cols=3 ; border width=2 ; border height=2
         container.setOpaque(true);
@@ -73,13 +77,13 @@ public class GraphicsEngine3D extends JPanel implements ActionListener
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setTitle("3-D Graphics Engine - Nick Bittar");
-        frame.setSize(900+21, 600+42);
+        frame.setSize(900+23, 600+46);
         frame.setVisible(true);
 
         container.add(controls);
         container.add(view3D);
         container.add(topView);
-        container.add(new JButton("Command Box"));
+        container.add(controls2);
         container.add(sideView);
         container.add(frontView);
 
@@ -99,6 +103,13 @@ public class GraphicsEngine3D extends JPanel implements ActionListener
         moveZNegBtn.addActionListener(this);
         FOVneg.addActionListener(this);
         FOVpos.addActionListener(this);
+        wireBtn.addActionListener(this);
+        lightBtn.addActionListener(this);
+        zoomInBtn.addActionListener(this);
+        zoomOutBtn.addActionListener(this);
+        rollLeftBtn.addActionListener(this);
+        rollRightBtn.addActionListener(this);
+        colorBtn.addActionListener(this);
         // Set timer to redraw panel every 16ms for ~60 frames per second to be rendered
         Timer timer = new Timer(16, this);
         timer.start();
@@ -109,8 +120,10 @@ public class GraphicsEngine3D extends JPanel implements ActionListener
 
         JPanel modelCtrls = new JPanel();
         JPanel cameraCtrls = new JPanel();
+        JPanel fovCtrls = new JPanel();
         modelCtrls.setLayout(new GridLayout(5, 4, 0, 0));
         cameraCtrls.setLayout(new GridLayout(2, 3, 0, 0));
+        fovCtrls.setLayout(new GridLayout(2, 1, 0, 0));
 
         resetBtn = new JButton("Reset");
         resetBtn.setActionCommand("reset");
@@ -160,6 +173,16 @@ public class GraphicsEngine3D extends JPanel implements ActionListener
         FOVneg.setActionCommand("fov -1");
         FOVpos.setActionCommand("fov 1");
 
+        wireBtn = new JButton("Wireframe");
+        wireBtn.setActionCommand("wire");
+        lightBtn = new JButton("Light");
+        lightBtn.setActionCommand("light");
+        colorBtn = new JButton("Color");
+        colorBtn.setActionCommand("color");
+
+        fovCtrls.add(FOVpos);
+        fovCtrls.add(FOVneg);
+
 
 
         modelCtrls.add(new JLabel("Spin"));
@@ -189,15 +212,43 @@ public class GraphicsEngine3D extends JPanel implements ActionListener
 
         cameraCtrls.add(resetBtn);
         cameraCtrls.add(updateBtn);
-        cameraCtrls.add(new JButton(""));
-        cameraCtrls.add(new JButton(""));
-        cameraCtrls.add(FOVneg);
-        cameraCtrls.add(FOVpos);
+        cameraCtrls.add(fovCtrls);
+        cameraCtrls.add(wireBtn);
+        cameraCtrls.add(lightBtn);
+        cameraCtrls.add(colorBtn);
 
 
 
         controls.add(modelCtrls);
         controls.add(cameraCtrls);
+    }
+    public static void loadControls2(JPanel controls2)
+    {
+        controls2.setLayout(new GridLayout(3, 3, 0, 0));
+
+        zoomInBtn = new JButton("Zoom In");
+        zoomOutBtn = new JButton("Zoom Out");
+        zoomInBtn.setActionCommand("zoom -1");
+        zoomOutBtn.setActionCommand("zoom 1");
+
+        rollLeftBtn = new JButton("Roll Left");
+        rollRightBtn = new JButton("Roll Right");
+        rollLeftBtn.setActionCommand("roll 1 0 -1");
+        rollRightBtn.setActionCommand("roll -1 0 1");
+
+
+        controls2.add(new JButton(""));
+        controls2.add(zoomInBtn);
+        controls2.add(new JButton(""));
+
+        controls2.add(rollLeftBtn);
+        controls2.add(new JButton(""));
+        controls2.add(rollRightBtn);
+
+        controls2.add(new JButton(""));
+        controls2.add(zoomOutBtn);
+        controls2.add(new JButton(""));
+
     }
     /**
      * Timer event. Fires every 16ms or about 60 times per second
@@ -219,6 +270,7 @@ public class GraphicsEngine3D extends JPanel implements ActionListener
                 double Cz = centroid[2];
                 // Translate so centroid is at the origin
                 model.translate(-Cx, -Cy, -Cz);
+
             }
             else if(ev.getActionCommand().equals("update"))
             {
@@ -282,6 +334,38 @@ public class GraphicsEngine3D extends JPanel implements ActionListener
             {
                 String[] cmd = ev.getActionCommand().split(" ");
                 view3D.changeFOV(Integer.parseInt(cmd[1]));
+            }
+            else if(ev.getActionCommand().contains("wire"))
+            {
+                view3D.showWireFrame = !view3D.showWireFrame;
+            }
+            else if(ev.getActionCommand().contains("light"))
+            {
+                view3D.applyLighting = !view3D.applyLighting;
+            }
+            else if(ev.getActionCommand().contains("color"))
+            {
+                view3D.applyColor = !view3D.applyColor;
+            }
+            else if(ev.getActionCommand().contains("zoom"))
+            {
+                String[] cmd = ev.getActionCommand().split(" ");
+                scale += Integer.parseInt(cmd[1]);
+                if(scale == 0)
+                {
+                    scale += Integer.parseInt(cmd[1]);
+                }
+                view3D.changeScale(scale);
+                topView.changeScale(scale);
+                sideView.changeScale(scale);
+                frontView.changeScale(scale);
+            }
+            else if(ev.getActionCommand().contains("roll"))
+            {
+                String[] cmd = ev.getActionCommand().split(" ");
+                view3D.up.x += Integer.parseInt(cmd[1])/10f;
+                view3D.up.z += Integer.parseInt(cmd[3])/10f;
+                view3D.updateCamera();
             }
         }
         model.rotate(theta, phi, omega);

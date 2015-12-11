@@ -34,12 +34,16 @@ public class ThreeDimensionalView extends JPanel
     Model axis;
     int AvertexCount = 6;
 
+    boolean showWireFrame, applyLighting, applyColor;
+
     BufferedImage img;
     double[][] zBuffer;
 
     Light light;
 
-    public ThreeDimensionalView(Model obj)
+    int scale;
+
+    public ThreeDimensionalView(Model obj, int scale)
     {
         model = obj;
         projection = model.copy();
@@ -47,22 +51,27 @@ public class ThreeDimensionalView extends JPanel
         triangleCount = model.getTriangleCount();
         vertexCount = model.getVertexCount();
         axis = new Model("axis", new int[]{5});
-        light = new Light(new Point(5, 5, 0));
+        light = new Light(new Point(-10, -10, -10));
         w = 300;
         h = 300;
+        showWireFrame = true;
+        applyLighting = true;
+        applyColor = true;
+        this.scale = scale;
 
-        updateCamera();
-
-    }
-    public void updateCamera()
-    {
         eX = 0;
         eY = 0;
-        eZ = -10;
+        eZ = -2*scale;
         fov = 60;
         aspectRatio = 1/1;
         up = new Vector(0, 1, 0);
         l = new Vector(1, 1, 1);
+
+        updateCamera();
+    }
+    public void updateCamera()
+    {
+        eZ = -2*scale;
 
         n = 0.1;
         f = 100;
@@ -132,15 +141,6 @@ public class ThreeDimensionalView extends JPanel
     }
     public void applyViewMatrixTransformation()
     {
-        /*
-        for(int i = 0; i < vertexCount; i++)
-        {
-            viewX[i] = model.getX(i)*U.x + model.getY(i)*U.y + model.getZ(i)*U.z + H[i] *(-eX);
-            viewY[i] = model.getX(i)*V.x + model.getY(i)*V.y + model.getZ(i)*V.z + H[i] *(-eY);
-            viewZ[i] = model.getX(i)*W.x + model.getY(i)*W.y + model.getZ(i)*W.z + H[i] *(-eZ);
-            H[i] = 0 + 0 + 0 + H[i] *1;
-        }
-        */
         Point p;
         double x, y, z, h;
 
@@ -245,40 +245,63 @@ public class ThreeDimensionalView extends JPanel
             drawLine(AscreenX[i], AscreenY[i], AscreenX[i + 1], AscreenY[i + 1], color);
         }
         Triangle T;
-        double[] lighting;
-        for(int y = 0; y < img.getHeight(); y++)
+        if(applyLighting || applyColor)
         {
-            for(int x = 0; x < img.getWidth(); x++)
+            double[] lighting;
+            for (int y = 0; y < img.getHeight(); y++)
             {
-                for(int i = 0; i < projection.getTriangleCount(); i++)
+                for (int x = 0; x < img.getWidth(); x++)
                 {
-                    T = projection.getTriangle(i);
-                    if(T.isFacingCamera() && T.containsPoint(new Point(x, y, 0)))
+                    for (int i = 0; i < projection.getTriangleCount(); i++)
                     {
-                        lighting = light.calculateIntensity(model.getTriangle(i).getCentroid(), model.getTriangle(i).getNormal(), new Point(eX, eY, eZ));
-                        //img.setRGB(x, y, new Color(150, 30, 30).getRGB());
-                        img.setRGB(x, y, new Color((int)(lighting[0]*255), (int) (lighting[1]*255), (int) (lighting[2]*255)).getRGB());
-                        break;
+                        T = projection.getTriangle(i);
+                        if (T.isFacingCamera() && T.containsPoint(new Point(x, y, 0)))
+                        {
+                            if (applyLighting)
+                            {
+                                lighting = light.calculateIntensity(model.getTriangle(i).getCentroid(), model.getTriangle(i).getNormal(), new Point(eX, eY, eZ));
+                            }
+                            else
+                            {
+                                lighting = new double[]{0.5033, 0.1053, 0.506};
+                            }
+                            if (!applyColor && applyLighting)
+                            {
+                                double grey = 0;
+                                grey += lighting[0];
+                                grey += lighting[1];
+                                grey += lighting[2];
+                                grey /= 3;
+
+                                lighting[0] = grey;
+                                lighting[1] = grey;
+                                lighting[2] = grey;
+                            }
+                            //img.setRGB(x, y, new Color(150, 30, 30).getRGB());
+                            img.setRGB(x, y, new Color((int) (lighting[0] * 255), (int) (lighting[1] * 255), (int) (lighting[2] * 255)).getRGB());
+                            break;
+                        }
                     }
                 }
             }
         }
-        color = Color.BLACK.getRGB();
-        /*
-        for(int i = 0; i < triangleCount; i++)
+        if(showWireFrame)
         {
-            T = projection.getTriangle(i);
-            if(T.isFacingCamera())
+            color = Color.BLACK.getRGB();
+            for (int i = 0; i < triangleCount; i++)
             {
-                Point A = T.getA();
-                Point B = T.getB();
-                Point C = T.getC();
-                drawLine((int) A.getX(), (int) A.getY(), (int) B.getX(), (int) B.getY(), color);
-                drawLine((int) B.getX(), (int) B.getY(), (int) C.getX(), (int) C.getY(), color);
-                drawLine((int) C.getX(), (int) C.getY(), (int) A.getX(), (int) A.getY(), color);
+                T = projection.getTriangle(i);
+                if (T.isFacingCamera() || (!applyLighting && !applyColor))
+                {
+                    Point A = T.getA();
+                    Point B = T.getB();
+                    Point C = T.getC();
+                    drawLine((int) A.getX(), (int) A.getY(), (int) B.getX(), (int) B.getY(), color);
+                    drawLine((int) B.getX(), (int) B.getY(), (int) C.getX(), (int) C.getY(), color);
+                    drawLine((int) C.getX(), (int) C.getY(), (int) A.getX(), (int) A.getY(), color);
+                }
             }
         }
-        */
         g.drawImage(img, 0, 0, null);
         g.setColor(Color.BLACK);
         g.drawString("3D", 4, 16);
@@ -343,5 +366,10 @@ public class ThreeDimensionalView extends JPanel
         {
             this.fov = 20;
         }
+    }
+    public void changeScale(int newScale)
+    {
+        this.scale = newScale;
+        updateCamera();
     }
 }

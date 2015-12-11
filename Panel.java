@@ -38,4 +38,9 @@ public class Panel extends JPanel
             g.drawString("Front", 1, 13);
         }
     }
+
+    public void changeScale(int scale)
+    {
+        view.changeScale(scale);
+    }
 }

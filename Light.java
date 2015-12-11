@@ -57,8 +57,8 @@ public class Light
         l = new Vector(position, p);
         n = normal;
         v = new Vector(e, p);
-        calculateReflectionVector();
         normalizeVectors();
+        calculateReflectionVector();
         double attenuation;
         attenuation = 1/(a + b*d + c*d*d);
         for(int color = 0; color < 3; color++)
@@ -70,12 +70,12 @@ public class Light
     private void calculateReflectionVector()
     {
         r = Vector.add(l, Vector.multiplyVector(n, (2 * Vector.dotProduct(l, n) / (Math.pow(n.getMagnitude(), 2)))).neg());
+        r.normalize();
     }
     private void normalizeVectors()
     {
         l.normalize();
         v.normalize();
-        r.normalize();
         n.normalize();
     }
 

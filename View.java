@@ -284,7 +284,7 @@ public class View
     public void changeScale(int scale)
     {
         this.scale = scale;
-        updateAxis(scale);
+        updateAxis(this.scale);
     }
     public BufferedImage getImage()
     {
