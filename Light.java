@@ -24,7 +24,7 @@ public class Light
     double a, b, c;     // Constants
 
     double d;           // Distance between light source and point on surface
-
+    double attenuation;
     public Light(Point p)
     {
         position = p;
@@ -50,6 +50,8 @@ public class Light
         b = 2;
         c = 2;
 
+        attenuation = 1/(a + b*d + c*d*d);
+
         alpha = 10;
     }
     public double[] calculateIntensity(Point p, Vector normal, Point e)
@@ -59,8 +61,7 @@ public class Light
         v = new Vector(e, p);
         normalizeVectors();
         calculateReflectionVector();
-        double attenuation;
-        attenuation = 1/(a + b*d + c*d*d);
+
         for(int color = 0; color < 3; color++)
         {
             I[color] = attenuation*(Kd*L[color][DIFFUSE]*Math.max(Vector.dotProduct(l, n), 0) + Ks*L[color][SPECULAR]*Math.max(Math.pow(Vector.dotProduct(r, v), 2), 0)) + Ka*L[color][AMBIENT];

@@ -368,7 +368,10 @@ public class GraphicsEngine3D extends JPanel implements ActionListener
                 view3D.updateCamera();
             }
         }
-        model.rotate(theta, phi, omega);
+        if(theta != 0 || phi != 0 || omega != 0)
+        {
+            model.rotate(theta, phi, omega);
+        }
 
         view3D.repaint();
         topView.repaint();

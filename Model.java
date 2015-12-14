@@ -354,10 +354,9 @@ public class Model
         // Translate so centroid is at pivot point
         translate( -Px, -Py, -Pz);
 
-        Point p;
         for(int i = 0; i < getVertexCount(); i++)
         {
-            p = vertices[i];
+            Point p = vertices[i];
             double x = p.getX();
             double y = p.getY();
             double z = p.getZ();

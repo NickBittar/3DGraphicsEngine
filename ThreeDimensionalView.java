@@ -142,7 +142,7 @@ public class ThreeDimensionalView extends JPanel
     public void applyViewMatrixTransformation()
     {
         Point p;
-        double x, y, z, h;
+        double x, y, z;
 
         for(int i = 0; i < vertexCount; i++)
         {
@@ -150,36 +150,37 @@ public class ThreeDimensionalView extends JPanel
             x = p.getX();
             y = p.getY();
             z = p.getZ();
-            h = H[i];
-            viewX[i] = x * U.x + y * U.y + z * U.z + h * (-eX);
-            viewY[i] = x * V.x + y * V.y + z * V.z + h * (-eY);
-            viewZ[i] = x * W.x + y * W.y + z * W.z + h * (-eZ);
-            H[i] = 0 + 0 + 0 + h * 1;
+            //h = H[i]; // h removed as it is always 1 for the first matrix transformation
+            viewX[i] = x * U.x + y * U.y + z * U.z + (-eX);
+            viewY[i] = x * V.x + y * V.y + z * V.z + (-eY);
+            viewZ[i] = x * W.x + y * W.y + z * W.z + (-eZ);
+            //H[i] = 0 + 0 + 0 + h * 1;   // was: 0 + 0 + 0 + h * 1, but can be simply put as: 1;  Actually not needed at all
 
         }
         for(int i = 0; i < AvertexCount; i++)
         {
-            AviewX[i] = axis.getX(i)*U.x + axis.getY(i)*U.y + axis.getZ(i)*U.z + AhomogenousVal[i] *(-eX);
-            AviewY[i] = axis.getX(i)*V.x + axis.getY(i)*V.y + axis.getZ(i)*V.z + AhomogenousVal[i] *(-eY);
-            AviewZ[i] = axis.getX(i)*W.x + axis.getY(i)*W.y + axis.getZ(i)*W.z + AhomogenousVal[i] *(-eZ);
-            AhomogenousVal[i] = 0 + 0 + 0 + AhomogenousVal[i] *1;
+            AviewX[i] = axis.getX(i)*U.x + axis.getY(i)*U.y + axis.getZ(i)*U.z + (-eX);
+            AviewY[i] = axis.getX(i)*V.x + axis.getY(i)*V.y + axis.getZ(i)*V.z + (-eY);
+            AviewZ[i] = axis.getX(i)*W.x + axis.getY(i)*W.y + axis.getZ(i)*W.z + (-eZ);
+            //AhomogenousVal[i] = 0 + 0 + 0 + AhomogenousVal[i] *1;
         }
     }
     public void applyPerspectiveMatrixTransformation()
     {
+        double fovTan = Math.tan(Math.toRadians(fov)/2);
         for(int i = 0; i < vertexCount; i++)
         {
-            persX[i] = viewX[i]*(1/(aspectRatio*Math.tan(Math.toRadians(fov)/2))) + 0 + 0 + 0;
-            persY[i] = 0 + viewY[i]*(1/(Math.tan(Math.toRadians(fov)/2))) + 0 + 0;
-            persZ[i] = 0 + 0 + viewZ[i]*((n+f)/(n-f)) + H[i] *((2*n*f)/(n-f));
-            H[i] = 0 + 0 + viewZ[i]*(-1) + 0;
+            persX[i] = viewX[i]*(1/(aspectRatio*fovTan)) + 0 + 0 + 0;
+            persY[i] = 0 + viewY[i]*(1/(fovTan)) + 0 + 0;
+            //persZ[i] = 0 + 0 + viewZ[i]*((n+f)/(n-f)) + H[i] *((2*n*f)/(n-f));    // Dont need Z from this point on because of no Z buffering
+            H[i] = 0 + 0 + -viewZ[i] + 0;
         }
 
         for(int i = 0; i < AvertexCount; i++)
         {
-            ApersX[i] = AviewX[i]*(1/(aspectRatio*Math.tan(Math.toRadians(fov)/2))) + 0 + 0 + 0;
-            ApersY[i] = 0 + AviewY[i]*(1/(Math.tan(Math.toRadians(fov)/2))) + 0 + 0;
-            ApersZ[i] = 0 + 0 + AviewZ[i]*((n+f)/(n-f)) + AhomogenousVal[i] *((2*n*f)/(n-f));
+            ApersX[i] = AviewX[i]*(1/(aspectRatio*fovTan)) + 0 + 0 + 0;
+            ApersY[i] = 0 + AviewY[i]*(1/(fovTan)) + 0 + 0;
+            //ApersZ[i] = 0 + 0 + AviewZ[i]*((n+f)/(n-f)) + AhomogenousVal[i] *((2*n*f)/(n-f));
             AhomogenousVal[i] = 0 + 0 + AviewZ[i]*(-1) + 0;
         }
     }
@@ -189,15 +190,15 @@ public class ThreeDimensionalView extends JPanel
         {
             ndcX[i] = persX[i]/ H[i];
             ndcY[i] = persY[i]/ H[i];
-            ndcZ[i] = persZ[i]/ H[i];
-            H[i] /= H[i];
+            //ndcZ[i] = persZ[i]/ H[i];     // No need for Z nor H from this point on
+            //H[i] /= H[i];
         }
         for(int i = 0; i < AvertexCount; i++)
         {
             AndcX[i] = ApersX[i]/ AhomogenousVal[i];
             AndcY[i] = ApersY[i]/ AhomogenousVal[i];
-            AndcZ[i] = ApersZ[i]/ AhomogenousVal[i];
-            AhomogenousVal[i] /= AhomogenousVal[i];
+            //AndcZ[i] = ApersZ[i]/ AhomogenousVal[i];
+            //AhomogenousVal[i] /= AhomogenousVal[i];
         }
     }
     public void NDCtoScreenCoordinates()
@@ -206,7 +207,7 @@ public class ThreeDimensionalView extends JPanel
         {
             screenX[i] = (int) Math.round(((ndcX[i]+1)*w/2));
             screenY[i] = (int) Math.round(((ndcY[i]+1)*h/2));
-            projection.setVertex(i, new Point(screenX[i], screenY[i], ndcZ[i]));
+            projection.setVertex(i, new Point(screenX[i], screenY[i], 0));  //ndcZ[i] was replaced with a 0
         }
         for(int i = 0; i < AvertexCount; i++)
         {
@@ -247,10 +248,10 @@ public class ThreeDimensionalView extends JPanel
         Triangle T;
         if(applyLighting || applyColor)
         {
-            double[] lighting;
-            for (int y = 0; y < img.getHeight(); y++)
+            double[] lighting = new double[]{0.5033, 0.1053, 0.506};
+            for (int y = 0; y < h; y++)
             {
-                for (int x = 0; x < img.getWidth(); x++)
+                for (int x = 0; x < w; x++)
                 {
                     for (int i = 0; i < projection.getTriangleCount(); i++)
                     {
@@ -261,10 +262,7 @@ public class ThreeDimensionalView extends JPanel
                             {
                                 lighting = light.calculateIntensity(model.getTriangle(i).getCentroid(), model.getTriangle(i).getNormal(), new Point(eX, eY, eZ));
                             }
-                            else
-                            {
-                                lighting = new double[]{0.5033, 0.1053, 0.506};
-                            }
+
                             if (!applyColor && applyLighting)
                             {
                                 double grey = 0;
